@@ -1,3 +1,11 @@
+// เพิ่มบรรทัดนี้ไว้ส่วนบนสุดของไฟล์ protect.js
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+if (!isMobile) {
+    // โค้ดป้องกันเดิมของคุณทำทำงานเฉพาะบนคอมพิวเตอร์เท่านั้น
+    // (ใส่โค้ดเดิมของคุณไว้ในนี้)
+}
+
 // ปิดการใช้งานคลิกขวา
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
@@ -25,10 +33,4 @@ setInterval(function() {
     }
 }, 1000);
 
-// เพิ่มบรรทัดนี้ไว้ส่วนบนสุดของไฟล์ protect.js
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-if (!isMobile) {
-    // โค้ดป้องกันเดิมของคุณทำทำงานเฉพาะบนคอมพิวเตอร์เท่านั้น
-    // (ใส่โค้ดเดิมของคุณไว้ในนี้)
-}
