@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hmong Social Media</title>
+     <!-- ลิงก์ดึงไฟล์ CSS มาใช้งาน -->
+    <link rel="stylesheet" href="feed-style.css">
+
+</head>
+
+<body>
+
+    <header>
+        <h1>Hmong Facebook </h1>
+        <a href="index.html" style="text-decoration:none; color:#1877f2; font-weight:bold;">🏠 Home</a>
+    </header>
+
+    <div class="container">
+        <!-- กล่องสร้างโพสต์ -->
+        <div class="create-post-card">
+            <textarea id="post-text" placeholder="Koj xav li cas nyob rau hnub no?......... "></textarea>
+
+            <input type="text" id="post-location" class="location-input"
+                placeholder="📍 เพิ่มสถานที่/ประเทศ (เช่น Bangkok, Thailand / Luang Prabang, Laos)">
+
+            <div id="preview-container">
+                <button class="remove-img-btn" onclick="removeImage()">✕</button>
+                <img id="preview-img" src="" alt="ตัวอย่างรูปภาพ">
+            </div>
+
+            <div class="post-options">
+                <button class="opt-btn" onclick="document.getElementById('file-input').click()">🖼️
+                    Xaiv duab tso</button>
+                <button class="opt-btn" onclick="openCamera()">📷 Yees duab</button>
+                <input type="file" id="file-input" accept="image/*" style="display: none;"
+                    onchange="handleFileSelect(event)">
+            </div>
+
+            <button class="btn-submit" onclick="submitPost()">Post duab</button>
+        </div>
+
+        <!-- รายการโพสต์ทั้งหมด -->
+        <div id="posts-feed"></div>
+    </div>
+
+    <!-- Modal เปิดกล้อง -->
+    <div id="camera-modal">
+        <video id="video-feed" autoplay playsinline></video>
+        <div class="camera-controls">
+            <button class="opt-btn" style="background:#1877f2; color:#fff;" onclick="takePhoto()">📸 ถ่ายรูป</button>
+            <button class="opt-btn" style="background:#e4e6eb;" onclick="closeCamera()">✕ ปิดกล้อง</button>
+        </div>
+        <canvas id="canvas" style="display: none;"></canvas>
+    </div>
+
+    <!-- Modal หน้าต่างแก้ไขโพสต์ -->
+    <div id="edit-modal" class="edit-modal-backdrop">
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3>✏️ Kho Post</h3>
+                <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
+            </div>
+            <textarea id="edit-post-text" class="modal-textarea" rows="4"></textarea>
+            <input type="text" id="edit-post-location" class="location-input" placeholder="📍 แก้ไขสถานที่/ประเทศ">
+            <button class="btn-submit" onclick="saveEditedPost()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        let currentImageData = null;
+        let videoStream = null;
+        let editingPostId = null;
+
+        // ย่อขนาดรูปภาพให้อัตโนมัติ
+        function compressImage(imgElement, maxWidth = 800, quality = 0.7) {
+            const canvas = document.createElement("canvas");
+            let width = imgElement.width;
+            let height = imgElement.height;
+
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(imgElement, 0, 0, width, height);
+            return canvas.toDataURL("image/jpeg", quality);
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function () {
+                        currentImageData = compressImage(img);
+                        showPreview(currentImageData);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showPreview(src) {
+            document.getElementById('preview-img').src = src;
+            document.getElementById('preview-container').style.display = 'block';
+        }
+
+        function removeImage() {
+            currentImageData = null;
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('file-input').value = '';
+        }
+
+        async function openCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
+                document.getElementById('video-feed').srcObject = videoStream;
+                document.getElementById('camera-modal').style.display = 'flex';
+            } catch (err) {
+                alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์");
+            }
+        }
+
+        function takePhoto() {
+            const video = document.getElementById('video-feed');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            const img = new Image();
+            img.src = canvas.toDataURL('image/jpeg');
+            img.onload = function () {
+                currentImageData = compressImage(img);
+                showPreview(currentImageData);
+                closeCamera();
+            }
+        }
+
+        function closeCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('camera-modal').style.display = 'none';
+        }
+
+        // สร้างโพสต์ใหม่
+        function submitPost() {
+            const text = document.getElementById('post-text').value.trim();
+            const location = document.getElementById('post-location').value.trim();
+
+            if (!text && !currentImageData) {
+                alert("กรุณาพิมพ์ข้อความหรือเลือกรูปภาพก่อนโพสต์");
+                return;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                text: text,
+                location: location,
+                image: currentImageData,
+                isPinned: false,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+            };
+
+            let posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+            posts.unshift(newPost);
+            localStorage.setItem('hmong_posts', JSON.stringify(posts));
+
+            document.getElementById('post-text').value = '';
+            document.getElementById('post-location').value = '';
+            removeImage();
+
+            loadPosts();
+        }
+
+        // สลับเปิด/ปิด เมนู 3 จุด
+        function toggleDropdown(postId) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu.id !== `dropdown-${postId}`) menu.classList.remove('show');
+            });
+            const menu = document.getElementById(`dropdown-${postId}`);
+            if (menu) menu.classList.toggle('show');
+        }
+
+        window.onclick = function (e) {
+            if (!e.target.matches('.three-dots-btn')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+            }
+        }
+
+        // ลบโพสต์ออกจากฐานข้อมูล LocalStorage
+        function deletePost(postId) {
+            if (confirm("คุณต้องการลบโพสต์นี้ออกจากฐานข้อมูลใช่หรือไม่?")) {
+                let posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+                posts = posts.filter(p => p.id !== postId);
+                localStorage.setItem('hmong_posts', JSON.stringify(posts));
+                loadPosts();
+            }
+        }
+
+        // เปิด Modal แก้ไขโพสต์
+        function openEditModal(postId) {
+            const posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+            const post = posts.find(p => p.id === postId);
+
+            if (post) {
+                editingPostId = postId;
+                document.getElementById('edit-post-text').value = post.text || '';
+                document.getElementById('edit-post-location').value = post.location || '';
+                document.getElementById('edit-modal').style.display = 'flex';
+            }
+        }
+
+        // ปิด Modal แก้ไขโพสต์
+        function closeEditModal() {
+            editingPostId = null;
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // บันทึกโพสต์ที่แก้ไขลง LocalStorage
+        function saveEditedPost() {
+            if (!editingPostId) return;
+
+            const updatedText = document.getElementById('edit-post-text').value.trim();
+            const updatedLocation = document.getElementById('edit-post-location').value.trim();
+
+            let posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+            const postIndex = posts.findIndex(p => p.id === editingPostId);
+
+            if (postIndex !== -1) {
+                posts[postIndex].text = updatedText;
+                posts[postIndex].location = updatedLocation;
+                localStorage.setItem('hmong_posts', JSON.stringify(posts));
+                closeEditModal();
+                loadPosts();
+            }
+        }
+
+        // สลับสถานะ Pin / Unpin โพสต์ (ปักหมุดได้สูงสุด 3 โพสต์)
+        function togglePinPost(postId) {
+            let posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+            const post = posts.find(p => p.id === postId);
+
+            if (post) {
+                if (!post.isPinned) {
+                    const pinnedCount = posts.filter(p => p.isPinned).length;
+                    if (pinnedCount >= 3) {
+                        alert("คุณสามารถปักหมุดโพสต์ได้สูงสุดเพียง 3 โพสต์เท่านั้น");
+                        return;
+                    }
+                    post.isPinned = true;
+                } else {
+                    post.isPinned = false;
+                }
+
+                localStorage.setItem('hmong_posts', JSON.stringify(posts));
+                loadPosts();
+            }
+        }
+
+        // ดาวน์โหลดรูปภาพลงมือถือ
+        function downloadImage(imageUrl) {
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = `hmong-post-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // แสดงรายการโพสต์ทั้งหมด
+        function loadPosts() {
+            const postsFeed = document.getElementById('posts-feed');
+            let posts = JSON.parse(localStorage.getItem('hmong_posts') || '[]');
+
+            // เรียงให้โพสต์ที่ Pin อยู่บนสุดก่อน
+            posts.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+
+            postsFeed.innerHTML = '';
+
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+
+                postCard.innerHTML = `
+                    <div class="post-header">
+                        <div class="user-meta">
+                            <div class="avatar">H</div>
+                            <div class="user-info">
+                                <div class="name">
+                                    Hmong Facebook Post 
+                                    ${post.isPinned ? '<span class="pinned-tag">📌 ปักหมุด</span>' : ''}
+                                </div>
+                                <div class="location">${post.time} ${post.location ? '• 📍 ' + post.location : ''}</div>
+                            </div>
+                        </div>
+
+                        <!-- ปุ่ม 3 จุดและเมนูตัวเลือก -->
+                        <div class="more-options-container">
+                            <button class="three-dots-btn" onclick="toggleDropdown(${post.id})">⋮</button>
+                            <div id="dropdown-${post.id}" class="dropdown-menu">
+                                <button class="dropdown-item" onclick="openEditModal(${post.id})">
+                                    ✏️ แก้ไขโพสต์
+                                </button>
+                                <button class="dropdown-item" onclick="togglePinPost(${post.id})">
+                                    ${post.isPinned ? '📌 ยกเลิกการปักหมุด' : '📌 ปักหมุดโพสต์นี้'}
+                                </button>
+                                ${post.image ? `
+                                    <button class="dropdown-item" onclick="downloadImage('${post.image}')">
+                                        📥 ดาวน์โหลดรูปภาพ
+                                    </button>
+                                ` : ''}
+                                <button class="dropdown-item delete" onclick="deletePost(${post.id})">
+                                    🗑️ ลบโพสต์
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${post.text ? `<div class="post-content">${post.text}</div>` : ''}
+                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Post Image">` : ''}
+
+                    <div class="post-actions">
+                        <button class="action-btn">👍 Ua tsaug (ถูกใจ)</button>
+                        <button class="action-btn">💬 ความคิดเห็น</button>
+                    </div>
+                `;
+                postsFeed.appendChild(postCard);
+            });
+        }
+
+        loadPosts();
+    </script>
+
+
+    <!-- นำไปวางต่อท้ายก่อนปิด </body> -->
+
+
+
+    <!-- ลิงก์ดึงไฟล์ป้องกันการเปิดดูโค้ดมาใช้งาน -->
+    <script src="protect.js"></script>
+</body>
+
+</html>
