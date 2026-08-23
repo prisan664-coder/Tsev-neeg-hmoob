@@ -86,15 +86,47 @@
     }
 
     /* จัดการกล่องที่ครอบรูปภาพ */
-.image-box {
-    text-align: center; /* จัดรูปภาพให้อยู่ตรงกลาง */
-    margin: 15px 0;     /* เว้นระยะห่างด้านบนและด้านล่างรูปภาพ */
-}
+    .image-box {
+        text-align: center;
+        /* จัดรูปภาพให้อยู่ตรงกลาง */
+        margin: 15px 0;
+        /* เว้นระยะห่างด้านบนและด้านล่างรูปภาพ */
+    }
 
-/* ควบคุมขนาดรูปภาพ */
-.image-box img {
-    max-width: 100%;    /* รูปจะไม่ขยายกว้างเกินกล่องข้อความ */
-    width: 300px;       /* กำหนดความกว้างรูปภาพตามต้องการ (ปรับลด-เพิ่มตัวเลขนี้ได้) */
-    height: auto;       /* ให้ความสูงปรับตามอัตราส่วนของรูปภาพอัตโนมัติ รูปจะไม่เบี้ยว */
-    border-radius: 8px; /* (ตัวเลือกเสริม) ทำมุมโค้งมนให้รูปดูสวยงามขึ้น */
-}
+    /* ควบคุมขนาดรูปภาพ */
+    .image-box img {
+        max-width: 100%;
+        /* รูปจะไม่ขยายกว้างเกินกล่องข้อความ */
+        width: 300px;
+        /* กำหนดความกว้างรูปภาพตามต้องการ (ปรับลด-เพิ่มตัวเลขนี้ได้) */
+        height: auto;
+        /* ให้ความสูงปรับตามอัตราส่วนของรูปภาพอัตโนมัติ รูปจะไม่เบี้ยว */
+        border-radius: 8px;
+        /* (ตัวเลือกเสริม) ทำมุมโค้งมนให้รูปดูสวยงามขึ้น */
+    }
+
+    /* จัดตำแหน่งให้อยู่ตรงกลาง */
+    .button-wrapper {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    /* ตกแต่งปุ่มกด */
+    .read-online-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #27ae60;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 30px;
+        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .read-online-btn:hover {
+        background-color: #219150;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+    }
