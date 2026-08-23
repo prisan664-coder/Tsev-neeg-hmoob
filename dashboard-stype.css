@@ -1,0 +1,166 @@
+ /* 1. ตั้งค่าพื้นฐาน */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f4f7f6;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 2. ส่วนหัว (Header & Navigation) ตามรูปภาพ */
+        header {
+            background-color: #2f4050;
+            color: #ffffff;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        nav {
+            background-color: #1a1c29;
+            padding: 0.7rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #1abc9c;
+        }
+
+        /* 3. ส่วนเนื้อหาตรงกลาง (ผังตระกูล) */
+        main {
+            flex: 1;
+            max-width: 1000px;
+            width: 90%;
+            margin: 2rem auto;
+            text-align: center;
+        }
+
+        .generation-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .generation-title {
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2f4050;
+            border-bottom: 2px dashed #1abc9c;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            width: 130px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .member-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #3498db;
+            margin-bottom: 8px;
+        }
+
+        .member-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .member-role {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        /* 4. หน้าต่างป๊อปอัพประวัติ (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: left;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .modal-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 15px auto;
+            object-fit: cover;
+        }
+
+        /* 5. ส่วนท้าย (Footer) ตามรูปภาพ */
+        footer {
+            background-color: #2f4050;
+            color: #ffffff;
+            text-align: center;
+            padding: 1.2rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
